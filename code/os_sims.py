@@ -194,9 +194,8 @@ if __name__=='__main__':
 
     parser = argparse.ArgumentParser()
 
-    timdir = '/Users/hazboun/pta_simulations/dsa_partim_181105/partim/'
-    #'/home/jeffrey.hazboun/nanograv/dsa2000_simulations/dsa_partim_181105'
-    pardir = timdir #'/home/jeffrey.hazboun/nanograv/dsa2000_simulations/dsa_partim_181105'
+    timdir = '/home/jeffrey.hazboun/nanograv/dsa2000_simulations/dsa_partim_181105/partim/'
+    pardir = '/home/jeffrey.hazboun/nanograv/dsa2000_simulations/dsa_partim_181105/partim/'
     pardir_no_dmx = '/home/jeffrey.hazboun/nanograv/dsa2000_simulations/dsa_partim_181105'
 
     parser.add_argument('--timdir', dest='timdir', action='store', type=str,
