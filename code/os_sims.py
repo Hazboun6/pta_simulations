@@ -52,7 +52,7 @@ class os_simulation(object):
         libs_psrs = []
         for p, t in zip(parfiles, timfiles):
 
-            psr = T2.tempopulsar(p, t, ephem=ephem)
+            psr = T2.tempopulsar(p, t, ephem=ephem, maxobs=30000)
             libs_psrs.append(psr)
             if verbose:
                 print('\rPSR {0} loaded.'.format(psr_name(p)),
