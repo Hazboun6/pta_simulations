@@ -16,6 +16,7 @@ import libstempo.plot as LP
 from shutil import copyfile, copy2
 import scipy.stats as sci_stats
 
+sys.path.insert(0,'/home/jeffrey.hazboun/nanograv/dsa2000_simulations/enterprise/')
 import enterprise
 from enterprise.pulsar import Pulsar
 import enterprise.signals.parameter as parameter
@@ -251,7 +252,7 @@ if __name__=='__main__':
     parfiles = sorted(glob.glob(args.pardir+'*.par'))
     timfiles = sorted(glob.glob(args.timdir+'*.tim'))
 
-    cuts = [60676.,  62502.,  64328.,  66154.]
+    cuts = [57000, 58800, 60676.,  62502.,  64328.,  66154.]
 
     sim = os_simulation(parfiles,timfiles,ephem=args.ephem,verbose=True)
 
@@ -267,10 +268,11 @@ if __name__=='__main__':
     OptStat = OS.OptimalStatistic(psrs=sim.psrs, pta=pta,
                                   bayesephem=args.bayes_ephem)
 
+    #xi, rho, sigma, Agwb_sqr, os_sigma = OptStat.compute_os()
     xi, rho, sigma, Agwb_sqr, os_sigma = OptStat.compute_os()
-
-    np.save(args.outpath,
-            [xi, rho, sigma, Agwb_sqr, os_sigma, sim.last_toa, sim.seed])
+    #xi, rho, sigma, 
+    out = [[Agwb_sqr, os_sigma, sim.last_toa, sim.seed]]
+    np.savetxt(args.outpath, out, fmt='%e, %e, %f, %i')
 
     print('MJD {0} analysis complete'.format(sim.last_toa))
 
@@ -280,8 +282,11 @@ if __name__=='__main__':
         OptStat = OS.OptimalStatistic(psrs=sim.psrs, pta=pta,
                                       bayesephem=args.bayes_ephem)
 
+        #xi, rho, sigma, Agwb_sqr, os_sigma = OptStat.compute_os()
         xi, rho, sigma, Agwb_sqr, os_sigma = OptStat.compute_os()
-
-        np.save(args.outpath,
-                [xi, rho, sigma, Agwb_sqr, os_sigma, mjd, sim.seed])
+        #xi, rho, sigma, 
+        out.append([Agwb_sqr, os_sigma, mjd, sim.seed])
+        
+        np.savetxt(args.outpath, out, fmt='%e, %e, %f, %i')
+        
         print('MJD {0} analysis complete'.format(mjd))
