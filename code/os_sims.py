@@ -66,10 +66,14 @@ class os_simulation(object):
         self.toa_cuts = [self.last_toa]
         self.gwb_added = False
 
-    def createGWB(self, A_gwb, gamma_gw= 13./3, seed=None):
+    def createGWB(self, A_gwb, gamma_gw= 13./3, seed=None, fit=None):
         """Great GWB using libstempo.toasim"""
         if A_gwb!=0:
             LT.createGWB(self.libs_psrs, A_gwb, gamma_gw, seed=seed)
+            # Fit libstempo psr
+            if fit is not None:
+                for psr in self.libs_psrs:
+                    psr.fit(iters=fit)
         else:
             pass
         self.gwb_added = True
@@ -254,7 +258,7 @@ if __name__=='__main__':
 
     cuts = [57000, 58800, 60676.,  62502.,  64328.,  66154.]
 
-    sim = os_simulation(parfiles,timfiles,ephem=args.ephem,verbose=True)
+    sim = os_simulation(parfiles, timfiles, ephem=args.ephem,verbose=True)
 
     cuts = cuts[::-1]
     seed_gwb = 67981 + args.process #int(os.times()[4]*100)
@@ -263,14 +267,14 @@ if __name__=='__main__':
 
     sim.init_ePulsars()
 
-    pta = model_simple(sim.psrs,gamma_common=args.gamma_gw)
+    pta = model_simple(sim.psrs, gamma_common=args.gamma_gw)
 
     OptStat = OS.OptimalStatistic(psrs=sim.psrs, pta=pta,
                                   bayesephem=args.bayes_ephem)
 
     #xi, rho, sigma, Agwb_sqr, os_sigma = OptStat.compute_os()
-    xi, rho, sigma, Agwb_sqr, os_sigma = OptStat.compute_os()
-    #xi, rho, sigma, 
+    xi, rho, sigma, Agwb_sqr, os_sigma = OptStat.compute_os(params={'log10_A_gw':np.log10(args.A_gwb))
+    #xi, rho, sigma,
     out = [[Agwb_sqr, os_sigma, sim.last_toa, sim.seed]]
     np.savetxt(args.outpath, out, fmt='%e, %e, %f, %i')
 
@@ -284,9 +288,9 @@ if __name__=='__main__':
 
         #xi, rho, sigma, Agwb_sqr, os_sigma = OptStat.compute_os()
         xi, rho, sigma, Agwb_sqr, os_sigma = OptStat.compute_os()
-        #xi, rho, sigma, 
+        #xi, rho, sigma,
         out.append([Agwb_sqr, os_sigma, mjd, sim.seed])
-        
+
         np.savetxt(args.outpath, out, fmt='%e, %e, %f, %i')
-        
+
         print('MJD {0} analysis complete'.format(mjd))
