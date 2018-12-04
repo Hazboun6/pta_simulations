@@ -287,7 +287,7 @@ if __name__=='__main__':
                                       bayesephem=args.bayes_ephem)
 
         #xi, rho, sigma, Agwb_sqr, os_sigma = OptStat.compute_os()
-        xi, rho, sigma, Agwb_sqr, os_sigma = OptStat.compute_os()
+        xi, rho, sigma, Agwb_sqr, os_sigma = OptStat.compute_os(params={'log10_A_gw':np.log10(args.A_gwb)})
         #xi, rho, sigma,
         out.append([Agwb_sqr, os_sigma, mjd, sim.seed])
 
