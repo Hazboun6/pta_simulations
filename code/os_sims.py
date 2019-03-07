@@ -65,6 +65,7 @@ class os_simulation(object):
         self.last_toa = np.amax([p.toas().max() for p in libs_psrs])
         self.toa_cuts = [self.last_toa]
         self.gwb_added = False
+        
 
     def createGWB(self, A_gwb, gamma_gw= 13./3, seed=None, fit=None):
         """Great GWB using libstempo.toasim"""
@@ -88,6 +89,18 @@ class os_simulation(object):
         psrs = []
         for p in self.libs_psrs:
             psr = Pulsar(p, ephem=self.ephem, **kwarg)
+            
+            ### Check first toa ####
+            #mn = psr.residuals[:100].mean()
+            #std = psr.residuals[:100].std()
+            #check_val = mn + 4*std
+            #if any([abs(res)>abs(check_val) for res in psr.residuals]):
+            #    mask = np.where(abs(psr.residuals)>abs(check_val),False,True)
+            #    model_utils.mask_filter(psr,mask)
+            mask = np.ones_like(psr.toas,dtype=bool)
+            mask[0] = False
+            model_utils.mask_filter(psr,mask)
+                
             psrs.append(psr)
 
         self.psrs=psrs
@@ -190,6 +203,13 @@ def model_simple(psrs, psd='powerlaw', components=30,
 
     return pta
 
+######## Red Noise Parameters ############
+#Since there is no red noise we make a dictionary of low RN Values
+
+def get_rn_dict(pta):
+    #psr_list = pta
+    pass
+
 
 ######## File I/O ###############
 def save(outpath):
@@ -199,9 +219,13 @@ if __name__=='__main__':
 
     parser = argparse.ArgumentParser()
 
-    timdir = '/home/jeffrey.hazboun/nanograv/dsa2000_simulations/dsa_partim_181105/partim/'
-    pardir = '/home/jeffrey.hazboun/nanograv/dsa2000_simulations/dsa_partim_181105/partim/'
-    pardir_no_dmx = '/home/jeffrey.hazboun/nanograv/dsa2000_simulations/dsa_partim_181105'
+    timdir = '/home/jeffrey.hazboun/nanograv/dsa2000_simulations/data_jsh/partim/'
+    #dsa_partim_181105/partim/'
+    #dsa_partim_181214
+    pardir = '/home/jeffrey.hazboun/nanograv/dsa2000_simulations/data_jsh/partim/'
+    #dsa_partim_181105/partim/'
+    #dsa_partim_181214
+    pardir_no_dmx = '/home/jeffrey.hazboun/nanograv/dsa2000_simulations/dsa_partim_181214'
 
     parser.add_argument('--timdir', dest='timdir', action='store', type=str,
                         default=timdir, help='Output Directory')
@@ -251,17 +275,32 @@ if __name__=='__main__':
 
     # parse arguments
     args = parser.parse_args()
-
+    
+    outdir_str = args.outpath.split('/')
+    outdir = '/'.join(outdir_str[:-1])
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
+        
     #Get par and tim files.
     parfiles = sorted(glob.glob(args.pardir+'*.par'))
     timfiles = sorted(glob.glob(args.timdir+'*.tim'))
-
-    cuts = [57000, 58800, 60676.,  62502.,  64328.,  66154.]
+    
+    #cuts = [57000., 57450.,
+    #        57900., 58350.,
+    #        58800., 59034.,
+    #        59269., 59503.,
+    #        59738., 60207.,
+    #        60676., 61589.,
+    #        62502., 63415.,
+    #        64328., 65241.,
+    #        66154.]
+    cuts = np.linspace(57000.,66154.,10)
+    #cuts = [57000, 58800, 60676.,  62502.,  64328.,  66154.]
 
     sim = os_simulation(parfiles, timfiles, ephem=args.ephem,verbose=True)
 
     cuts = cuts[::-1]
-    seed_gwb = 67981 + args.process #int(os.times()[4]*100)
+    seed_gwb = args.process #int(os.times()[4]*100) +
 
     sim.createGWB(A_gwb=args.A_gwb, gamma_gw=args.gamma_gw, seed=seed_gwb)
 
